@@ -17,6 +17,9 @@ from quepy.dsl import FixedType, HasKeyword, FixedRelation, FixedDataRelation
 HasKeyword.relation = "rdfs:label"
 HasKeyword.language = "en"
 
+class HasDesease(HasKeyword):
+    relation = "<http://wifo5-04.informatik.uni-mannheim.de/diseasome/resource/diseasome/name>"
+    language = None
 
 class IsPerson(FixedType):
     fixedtype = "foaf:Person"
@@ -60,6 +63,9 @@ class DefinitionOf(FixedRelation):
     relation = "rdfs:comment"
     reverse = True
 
+class AssociatedGene(FixedRelation):
+    relation = "<http://wifo5-04.informatik.uni-mannheim.de/diseasome/resource/diseasome/associatedGene>"
+    reverse = True
 
 class LabelOf(FixedRelation):
     relation = "rdfs:label"

@@ -163,6 +163,15 @@ if __name__ == "__main__":
     else:
         questions = default_questions
 
+    questions = [
+        # "what is a car",
+        # "What time is it in Cordoba",
+        # "what gene is associated with",
+        "What genes are associated with Acheiropody",
+        "What gene is connected to Acheiropody"
+        # "how are you holding"
+    ]
+
     print_handlers = {
         "define": print_define,
         "enum": print_enum,
@@ -196,6 +205,7 @@ if __name__ == "__main__":
             sparql.setQuery(query)
             sparql.setReturnFormat(JSON)
             results = sparql.query().convert()
+
 
             if not results["results"]["bindings"]:
                 print "No answer found :("
