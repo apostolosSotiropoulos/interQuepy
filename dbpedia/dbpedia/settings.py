@@ -15,7 +15,7 @@ Settings.
 LANGUAGE = "sparql"
 
 # NLTK config
-NLTK_DATA_PATH = ["/media/Todos/fun/5.pro/1.mine_pros/python/"]  # List of paths with NLTK data
+NLTK_DATA_PATH = ["/media/Todos/HMMY/3.thesis/dependencies4project"]  # List of paths with NLTK data
 
 # Encoding config
 DEFAULT_ENCODING = "utf-8"

@@ -13,7 +13,7 @@ Settings for testapp quepy.
 """
 
 LANGUAGE = "sparql"
-NLTK_DATA_PATH = ["/media/Todos/fun/5.pro/1.mine_pros/python/"]
+NLTK_DATA_PATH = ["/media/Todos/HMMY/3.thesis/dependencies4project"]
 SPARQL_PREAMBLE = '''
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
