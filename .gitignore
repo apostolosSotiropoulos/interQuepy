@@ -1,0 +1,7 @@
+# Compiled source
+*.pyc
+
+# IDE generated files
+.idea
+*.sublime-project
+*.sublime-workspace
