@@ -24,6 +24,7 @@ from quepy.encodingpolicy import encoding_flexible_conversion
 logger = logging.getLogger("quepy.quepyapp")
 
 
+
 def install(app_name):
     """
     Installs the application and gives an QuepyApp object
@@ -71,6 +72,7 @@ class QuepyApp(object):
         self._save_settings_values()
 
         self.tagger = get_tagger()
+        self.dbURI = None
         self.language = getattr(self._settings_module, "LANGUAGE", None)
         if not self.language:
             raise ValueError("Missing configuration for language")
@@ -120,13 +122,14 @@ class QuepyApp(object):
         weight order.
         """
         question = encoding_flexible_conversion(question)
-        for expression, userdata in self._iter_compiled_forms(question):
-            target, query = generation.get_code(expression, self.language)
+        for expression, metadata in self._iter_compiled_forms(question):
+            self._set_metadata(metadata)
+            target, query = generation.get_code(expression, self.language, self.dbURI)
             message = u"Interpretation {1}: {0}"
             logger.debug(message.format(str(expression),
                          expression.rule_used))
             logger.debug(u"Query generated: {0}".format(query))
-            yield target, query, userdata
+            yield target, query, self.userdata
 
     def _iter_compiled_forms(self, question):
         """
@@ -147,6 +150,12 @@ class QuepyApp(object):
             expression, userdata = rule.get_interpretation(words)
             if expression:
                 yield expression, userdata
+
+    def _set_metadata(self, metadata):
+        try:
+            self.userdata, self.dbURI = metadata
+        except:
+            self.userdata = metadata
 
     def _save_settings_values(self):
         """

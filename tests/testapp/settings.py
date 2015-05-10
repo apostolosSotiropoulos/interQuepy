@@ -11,7 +11,7 @@
 """
 Settings for testapp quepy.
 """
-
+DB_URI = u'<http://dbpedia.org/sparql>'
 LANGUAGE = "sparql"
 NLTK_DATA_PATH = ["/media/Todos/HMMY/3.thesis/dependencies4project"]
 SPARQL_PREAMBLE = '''

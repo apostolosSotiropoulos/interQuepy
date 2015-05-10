@@ -21,14 +21,14 @@ from quepy.dot_generation import expression_to_dot
 from quepy.sparql_generation import expression_to_sparql
 
 
-def get_code(expression, language):
+def get_code(expression, language, dbURI=None):
     """
     Given an expression and a supported language, it
     returns the query for that expression on that language.
     """
 
     if language == "sparql":
-        return expression_to_sparql(expression)
+        return expression_to_sparql(expression, False, dbURI)
     elif language == "dot":
         return expression_to_dot(expression)
     elif language == "mql":

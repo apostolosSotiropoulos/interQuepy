@@ -37,11 +37,14 @@ def adapt(x):
     return unicode(x)
 
 
-def expression_to_sparql(e, full=False):
+def expression_to_sparql(e, full=False, dbURI=None):
+
     template = u"{preamble}\n" +\
-               u"SELECT DISTINCT {select} WHERE {{\n" +\
-               u"{expression}\n" +\
-               u"}}\n"
+        u"SELECT DISTINCT {select} WHERE {{\n"
+    template = template + u"SERVICE {dbURI} {{\n" if dbURI else template
+    template = template + u"{expression}\n"
+    template = template +  u"}}\n" if dbURI else template
+    template = template + u"}}\n"
     head = adapt(e.get_head())
     if full:
         select = u"*"
@@ -56,9 +59,17 @@ def expression_to_sparql(e, full=False):
                 y += 1
             xs.append(triple(adapt(node), relation, adapt(dest),
                       indentation=1))
-    sparql = template.format(preamble=settings.SPARQL_PREAMBLE,
-                             select=select,
-                             expression=u"\n".join(xs))
+    if dbURI:
+        sparql = template.format(
+            preamble=settings.SPARQL_PREAMBLE,
+            select=select,
+            dbURI=dbURI,
+            expression=u"\n".join(xs))
+    else:
+        sparql = template.format(
+            preamble=settings.SPARQL_PREAMBLE,
+            select=select,
+            expression=u"\n".join(xs))
     return select, sparql
 
 

@@ -43,6 +43,17 @@ class TestQuepyApp(unittest.TestCase):
         from quepy import settings
         self.assertIn("testapp", settings.SPARQL_PREAMBLE)
 
+    def test_set_metadata_when_list_given(self):
+        metadata = ['enum', u'<http://dbpedia.org/sparql>']
+        self.app._set_metadata(metadata)
+        self.assertEqual('enum', self.app.userdata)
+        self.assertEqual(u'<http://dbpedia.org/sparql>', self.app.dbURI)
+
+    def test_set_metadata_when_string_given(self):
+        metadata = 'enum'
+        self.app._set_metadata(metadata)
+        self.assertEqual('enum', self.app.userdata)
+        self.assertIsNone(self.app.dbURI)
 
 if __name__ == "__main__":
     unittest.main()
