@@ -14,6 +14,7 @@ Implements the Quepy Application API
 import logging
 from importlib import import_module
 from types import ModuleType
+from copy import deepcopy
 
 from quepy import settings
 from quepy import generation
@@ -52,10 +53,37 @@ def question_sanitize(question):
     return question
 
 
+class SplitString(object):
+    """String that knows if, and can split by term"""
+
+    whole_string = []
+    substring_first = []
+    substring_second = []
+    is_rightmost = False
+
+    def __init__(self, arg):
+        self.whole_string = arg
+
+    def can_be_split_by_term(self, term):
+        try:
+            index = self.whole_string.index(term)
+
+            self.substring_first = SplitString(self.whole_string[0:index])
+            self.substring_first.is_rightmost = self.is_rightmost
+
+            self.substring_second = SplitString(self.whole_string[index:])
+            self.substring_second.is_rightmost = True
+        except Exception as e:
+            return False
+        return True
+
+
 class QuepyApp(object):
     """
     Provides the quepy application API.
     """
+
+    subquestions = []
 
     def __init__(self, parsing, settings):
         """
@@ -169,3 +197,29 @@ class QuepyApp(object):
                 if isinstance(value, str):
                     value = encoding_flexible_conversion(value)
                 setattr(settings, key, value)
+
+    def get_subquestions(self, words, keywords):
+        """ input:
+                ['hello', 'keyword1', 'is', 'foo', 'keyword2', 'is', 'bar'] and
+                ['keyword1', 'keyword2']
+            output:
+                [['keyword1', 'is', 'foo'], ['keyword2', 'is', 'bar']]"""
+
+        sstring = SplitString(words) if type(words) is list else words
+
+        if len(keywords) == 0:
+            return 42
+        keywords_copy = deepcopy(keywords)
+        keyword = keywords_copy.pop()
+
+        if sstring.can_be_split_by_term(keyword) :
+            second_substring = sstring.substring_second
+            if self.get_subquestions(second_substring, keywords_copy) == 42:
+                self.subquestions.append(second_substring.whole_string)
+
+            first_substring = sstring.substring_first
+            if self.get_subquestions(first_substring, keywords_copy) == 42 and \
+                first_substring.is_rightmost:
+                    self.subquestions.append(first_substring.whole_string)
+        else :
+            return self.get_subquestions(words, keywords_copy)

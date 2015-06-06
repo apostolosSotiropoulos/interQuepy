@@ -55,5 +55,41 @@ class TestQuepyApp(unittest.TestCase):
         self.assertEqual('enum', self.app.userdata)
         self.assertIsNone(self.app.dbURI)
 
+    def test_get_subquestions_when_no_keywords_matched(self):
+        question = 'what is the sequel of a movie about giant monster staring' \
+                   ' Akira Takarada'
+        keywords = ['foo']
+
+        expected_subquestions = []
+        self.app.get_subquestions(question.split(), keywords)
+        self.assertEqual(expected_subquestions, self.app.subquestions)
+
+    def test_get_subquestions_when_keywords_in_all_possible_orders(self):
+        k1 = 'sequel'
+        k2 = 'about'
+        k3 = 'staring'
+
+        self._get_subquestions_when_keywords_in_order(k1, k2, k3)
+        self._get_subquestions_when_keywords_in_order(k1, k3, k2)
+        self._get_subquestions_when_keywords_in_order(k2, k1, k3)
+        self._get_subquestions_when_keywords_in_order(k2, k3, k1)
+        self._get_subquestions_when_keywords_in_order(k3, k1, k2)
+        self._get_subquestions_when_keywords_in_order(k3, k2, k1)
+
+    def _get_subquestions_when_keywords_in_order(self, k1, k2, k3):
+        question = 'what is the sequel of a movie about giant monster staring' \
+                   ' Akira Takarada'
+        keywords = ['keyword1', k1, 'keyword2', k2, 'keyword3',
+                    k3,'keyword4']
+
+        expected_subquestions = [
+            'staring Akira Takarada'.split(),
+            'about giant monster'.split(),
+            'sequel of a movie'.split()
+        ]
+        self.app.get_subquestions(question.split(), keywords)
+        self.assertEqual(expected_subquestions, self.app.subquestions)
+        self.app.subquestions = []
+
 if __name__ == "__main__":
     unittest.main()
