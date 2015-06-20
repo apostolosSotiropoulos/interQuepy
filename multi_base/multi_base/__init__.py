@@ -5,3 +5,4 @@ Init for multi_base quepy.
 """
 
 from films import *
+from basic import *
