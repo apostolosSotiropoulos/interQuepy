@@ -11,18 +11,15 @@
 Implements the Quepy Application API
 """
 
-import logging
 from importlib import import_module
 from types import ModuleType
 from copy import deepcopy
 
 from quepy import settings
-from quepy import generation
 from quepy.parsing import QuestionTemplate
-from quepy.tagger import get_tagger, TaggingError
+from quepy.tagger import get_tagger
 from quepy.encodingpolicy import encoding_flexible_conversion
-
-logger = logging.getLogger("quepy.quepyapp")
+from question import Question
 
 
 
@@ -123,9 +120,9 @@ class QuepyApp(object):
 
         self.rules.sort(key=lambda x: x.weight, reverse=True)
 
-    def get_query(self, question):
+    def get_query(self, nl_question):
         """
-        Given `question` in natural language, it returns
+        Given `nl_question` in natural language, it returns
         three things:
 
         - the target of the query in string format
@@ -136,61 +133,14 @@ class QuepyApp(object):
         weight order.
         """
 
-        question = question_sanitize(question)
-        self.get_subquestions(question.split(), self.keywords)
-        subquestions = self.subquestions if self.subquestions else question
+        nl_question = question_sanitize(nl_question)
+        self.get_subquestions(nl_question.split(), self.keywords)
+        subquestions = self.subquestions if self.subquestions else nl_question
 
-        return subquestions
-        #query_object = Query_object(subquestions) # to do
-        #target, query, userdata = query_object.get_query() # to do
+        question = Question(subquestions, self.rules)
+        return question.get_query()
 
-    def get_queries(self, question):
-        """
-        Given `question` in natural language, it returns
-        three things:
 
-        - the target of the query in string format
-        - the query
-        - metadata given by the regex programmer (defaults to None)
-
-        The queries returned corresponds to the regexes that match in
-        weight order.
-        """
-        question = encoding_flexible_conversion(question)
-        for expression, metadata in self._iter_compiled_forms(question):
-            self._set_metadata(metadata)
-            target, query = generation.get_code(expression, self.language, self.dbURI)
-            message = u"Interpretation {1}: {0}"
-            logger.debug(message.format(str(expression),
-                         expression.rule_used))
-            logger.debug(u"Query generated: {0}".format(query))
-            yield target, query, self.userdata
-
-    def _iter_compiled_forms(self, question):
-        """
-        Returns all the compiled form of the question.
-        """
-
-        try:
-            words = list(self.tagger(question))
-        except TaggingError:
-            logger.warning(u"Can't parse tagger's output for: '%s'",
-                           question)
-            return
-
-        logger.debug(u"Tagged question:\n" +
-                     u"\n".join(u"\t{}".format(w for w in words)))
-
-        for rule in self.rules:
-            expression, userdata = rule.get_interpretation(words)
-            if expression:
-                yield expression, userdata
-
-    def _set_metadata(self, metadata):
-        try:
-            self.userdata, self.dbURI = metadata
-        except:
-            self.userdata = metadata
 
     def _save_settings_values(self):
         """
