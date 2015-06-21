@@ -24,6 +24,8 @@ class ActedOnQuestion(QuestionTemplate):
         "Movies starring Winona Ryder"
     """
 
+    keyword = 'staring'
+
     acted_on = (Lemma("appear") | Lemma("act") | Lemma("star"))
     movie = (Lemma("movie") | Lemma("movies") | Lemma("film"))
     # regex = (Question(Lemma("list")) + movie + Lemma("with") + Actor()) | \

@@ -84,6 +84,7 @@ class QuepyApp(object):
     """
 
     subquestions = []
+    keywords = []
 
     def __init__(self, parsing, settings):
         """
@@ -114,6 +115,9 @@ class QuepyApp(object):
                         element is not QuestionTemplate:
 
                     self.rules.append(element())
+                    if hasattr(element(), 'keyword'):
+                        self.keywords.append(element().keyword)
+
             except TypeError:
                 continue
 
@@ -133,9 +137,12 @@ class QuepyApp(object):
         """
 
         question = question_sanitize(question)
-        for target, query, userdata in self.get_queries(question):
-            return target, query, userdata
-        return None, None, None
+        self.get_subquestions(question.split(), self.keywords)
+        subquestions = self.subquestions if self.subquestions else question
+
+        return subquestions
+        #query_object = Query_object(subquestions) # to do
+        #target, query, userdata = query_object.get_query() # to do
 
     def get_queries(self, question):
         """
