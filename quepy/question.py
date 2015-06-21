@@ -85,5 +85,25 @@ class Subquestion(Question):
 
         return '?output', query, None
 
-    def _merge_subqueries(self, subqueries):
+    def _get_subquery(self, subquestion, counter, rules):
         pass
+
+    def _merge_subqueries(self, subqueries):
+        grouped_subqueries = {}
+        for subquery in subqueries:
+            subquery, db = subquery.values()
+            if db in grouped_subqueries:
+                grouped_subqueries[db] += subquery
+            else:
+                grouped_subqueries[db] = subquery
+
+        template = u"" + settings.SPARQL_PREAMBLE + "\n" +\
+                   u"SELECT DISTINCT ?output WHERE {\n"
+
+        for db, subquery in grouped_subqueries.items():
+            template += u"SERVICE <" + db + "> {\n"
+            template += u"" + subquery + "}\n"
+
+        template += u"}"
+
+        return template
