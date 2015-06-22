@@ -81,7 +81,7 @@ class QuepyApp(object):
     """
 
     subquestions = []
-    keywords = []
+    keywords = {}
 
     def __init__(self, parsing, settings):
         """
@@ -113,7 +113,7 @@ class QuepyApp(object):
 
                     self.rules.append(element())
                     if hasattr(element(), 'keyword'):
-                        self.keywords.append(element().keyword)
+                        self.keywords[element().keyword] = len(self.rules) - 1
 
             except TypeError:
                 continue
@@ -134,10 +134,10 @@ class QuepyApp(object):
         """
 
         nl_question = question_sanitize(nl_question)
-        self.get_subquestions(nl_question.split(), self.keywords)
+        self.get_subquestions(nl_question.split(), self.keywords.keys())
         subquestions = self.subquestions if self.subquestions else nl_question
 
-        question = Question(subquestions, self.rules)
+        question = Question(subquestions, self.rules, self.keywords)
         return question.get_query()
 
 

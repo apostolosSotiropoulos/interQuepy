@@ -9,13 +9,14 @@ logger = logging.getLogger("quepy.quepyapp")
 
 
 class Question():
-    def __init__(self, subquestions, rules):
+    def __init__(self, subquestions, rules, keywords = None):
         self.subquestions = subquestions
         self.rules = rules
+        self.keywords = keywords
 
     def get_query(self):
         if type(self.subquestions) is list:
-            question = Subquestion(self.subquestions, self.rules)
+            question = Subquestion(self.subquestions, self.rules, self.keywords)
         else:
             question = FullQuestion(self.subquestions, self.rules)
         return question.get_query()
@@ -78,15 +79,17 @@ class Subquestion(Question):
         counter = 0
 
         for subquestion in self.subquestions:
-            subquery = self._get_subquery(subquestion, counter, self.rules)
+            subquery = self._get_subquery(subquestion, counter,\
+                                            self.rules, self.keywords)
             subqueries.append(subquery)
 
         query = self._merge_subqueries(subqueries)
 
         return '?output', query, None
 
-    def _get_subquery(self, subquestion, counter, rules):
-        pass
+    def _get_subquery(self, subquestion, counter, rules, keywords):
+
+        return {'db': db,'query': query}
 
     def _merge_subqueries(self, subqueries):
         grouped_subqueries = {}
