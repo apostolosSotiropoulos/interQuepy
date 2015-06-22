@@ -4,7 +4,7 @@
 Domain specific language for multi_base quepy.
 """
 
-from quepy.dsl import FixedType, HasKeyword, FixedRelation, FixedDataRelation
+from quepy.dsl import *
 
 # classes used for basic dbpedia questions
 
@@ -33,9 +33,20 @@ class LocationOf(FixedRelation):
 
 # classes used for films
 
+
+class IsSubject(FixedType):
+    fixedtype = "skos:Concept"
+
+
 class IsPerson(FixedType):
     fixedtype = "foaf:Person"
 
+
+class IsSequel(HasKeyword):
+    relation = "movie:sequel"
+
+class SameAs(HasKeyword):
+    relation = "owl:sameAs"
 
 class LabelOf(FixedDataRelation):
     relation = "rdfs:label"
@@ -55,3 +66,7 @@ class IsMovie(FixedType):
 
 class HasActor(FixedRelation):
     relation = "dbpprop:starring"
+
+
+class HasSubject(FixedRelation):
+    relation = "dcterms:subject"

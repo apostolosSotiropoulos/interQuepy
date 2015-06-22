@@ -1,11 +1,9 @@
 from refo import Plus
 from quepy.parsing import Lemma, Pos, QuestionTemplate, Particle
 
-from dsl import IsMovie, NameOf, HasActor, IsPerson, LabelOf
-from settings import DBP_URI
+from dsl import *
 
 nouns = Plus(Pos("NN") | Pos("NNS") | Pos("NNP") | Pos("NNPS"))
-
 
 class Actor(Particle):
     regex = nouns
@@ -17,26 +15,49 @@ class Actor(Particle):
 
 class ActedOnQuestion(QuestionTemplate):
     """
-    Ex: "List movies with Hugh Laurie"
-        "Movies with Matt LeBlanc"
-        "In what movies did Jennifer Aniston appear?"
-        "Which movies did Mel Gibson starred?"
-        "Movies starring Winona Ryder"
+    Ex: "Movies starring Winona Ryder"
     """
 
-    keyword = 'staring'
+    keyword = 'starring'
 
-    acted_on = (Lemma("appear") | Lemma("act") | Lemma("star"))
-    movie = (Lemma("movie") | Lemma("movies") | Lemma("film"))
-    # regex = (Question(Lemma("list")) + movie + Lemma("with") + Actor()) | \
-    #         (Question(Pos("IN")) + (Lemma("what") | Lemma("which")) +
-    #          movie + Lemma("do") + Actor() + acted_on + Question(Pos("."))) | \
-    #         (Question(Pos("IN")) + Lemma("which") + movie + Lemma("do") +
-    #          Actor() + acted_on) | \
-    #         (Question(Lemma("list")) + movie + Lemma("star") + Actor())
     regex = Lemma("star") + Actor()
 
     def interpret(self, match):
-        movie = IsMovie() + HasActor(match.actor)
-        movie_name = NameOf(movie)
-        return movie_name, ("enum", DBP_URI)
+        movie = HasActor(match.actor) + IsMovie()
+        return movie, "enum"
+
+
+class Subject(Particle):
+    regex = nouns
+
+    def interpret(self, match):
+        name = match.words.tokens
+        return IsSubject() + LabelOf(name)
+
+
+class SubjectQuestion(QuestionTemplate):
+    """
+    Ex: "Movies about Giant Monsters"
+    """
+
+    keyword = 'about'
+
+    regex = Lemma("about") + Subject()
+
+    def interpret(self, match):
+        movie = HasSubject(match.subject) + IsMovie()
+        return movie, "enum"
+
+
+class SequelQuestion(QuestionTemplate):
+    """
+    Ex: "sequel of Godgilla and the Sea Monster"
+    """
+
+    # keyword = 'sequel of a'
+
+    movie = (Lemma("film") | Lemma("movie"))
+    regex = Lemma("sequel") + Lemma("of") + Lemma("a") + movie
+
+    def interpret(self, match):
+        return SameAs('input_var') + IsSequel('output_var')
