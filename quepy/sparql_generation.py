@@ -47,18 +47,12 @@ def expression_to_sparql(e, full=False):
         select = u"*"
     else:
         select = head
-    y = 0
-    xs = []
-    for node in e.iter_nodes():
-        for relation, dest in e.iter_edges(node):
-            if relation is IsRelatedTo:
-                relation = u"?y{}".format(y)
-                y += 1
-            xs.append(triple(adapt(node), relation, adapt(dest),
-                      indentation=1))
+
+    core_expression = get_core_sparql_expression(e)
+
     sparql = template.format(preamble=settings.SPARQL_PREAMBLE,
                              select=select,
-                             expression=u"\n".join(xs))
+                             expression=core_expression)
     return select, sparql
 
 
@@ -68,3 +62,15 @@ def triple(a, p, b, indentation=0):
     p = escape(p)
     s = _indent * indentation + u"{0} {1} {2}."
     return s.format(a, p, b)
+
+def get_core_sparql_expression(e):
+    y = 0
+    xs = []
+    for node in e.iter_nodes():
+        for relation, dest in e.iter_edges(node):
+            if relation is IsRelatedTo:
+                relation = u"?y{}".format(y)
+                y += 1
+            xs.append(triple(adapt(node), relation, adapt(dest),
+                      indentation=1))
+    return u"\n".join(xs)
