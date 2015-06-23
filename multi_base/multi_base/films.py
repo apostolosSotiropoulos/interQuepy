@@ -54,7 +54,7 @@ class SequelQuestion(QuestionTemplate):
     Ex: "sequel of Godgilla and the Sea Monster"
     """
 
-    # keyword = 'sequel of a'
+    keyword = 'sequel of a'
 
     movie = (Lemma("film") | Lemma("movie"))
     regex = Lemma("sequel") + Lemma("of") + Lemma("a") + movie

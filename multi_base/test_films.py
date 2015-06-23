@@ -1,6 +1,6 @@
 import unittest
 import quepy
-
+from quepy.question import Subquestion
 
 class TestFilmQuestions(unittest.TestCase):
 
@@ -36,6 +36,52 @@ class TestFilmQuestions(unittest.TestCase):
             """
 
         target, query, userdata = self.app.get_query(nl_question)
+        self.assertEqual(expected_query, query)
+
+    def test_get_subqueries_when_starring_question(self):
+        expected_query = \
+        u"""
+        ?x0 rdf:type foaf:Person.
+        ?x0 rdfs:label "Akira Takarada"@en.
+        ?x1 rdf:type dbpedia-owl:Film.
+        ?x1 dbpprop:starring ?x0.
+        """
+
+        subquestions = [['starring', 'Akira', 'Takarada']]
+        question = Subquestion(subquestions, self.app.rules, self.app.keywords)
+
+        query = question._get_subqueries()
+
+        self.assertEqual(expected_query, query)
+
+    def test_get_subqueries_when_subject_question(self):
+        expected_query = \
+        u"""
+        ?x100 rdf:type skos:Concept .
+        ?x100 rdfs:label "Giant monster films"@en .
+        ?x1 rdf:type dbpedia-owl:Film .
+        ?x1 dcterms:subject ?x100 .
+        """
+
+        subquestions = [['about', 'Giant', 'Monster']]
+        question = Subquestion(subquestions, self.app.rules, self.app.keywords)
+
+        query = question._get_subqueries()
+
+        self.assertEqual(expected_query, query)
+
+    def test_get_subqueries_when_sequel_question(self):
+        expected_query = \
+        u"""
+        ?x200 owl:sameAs ?x1.
+        ?x200 movie:sequel ?x201 .
+        """
+
+        subquestions = [['sequel', 'of', 'a', 'movie']]
+        question = Subquestion(subquestions, self.app.rules, self.app.keywords)
+
+        query = question._get_subqueries()
+
         self.assertEqual(expected_query, query)
 
 if __name__ == "__main__":

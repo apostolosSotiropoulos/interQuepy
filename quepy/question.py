@@ -75,19 +75,19 @@ class FullQuestion(Question):
 class Subquestion(Question):
     """Subquestion"""
     def get_query(self):
-        subqueries = []
-        counter = 0
-
-        for subquestion in self.subquestions:
-            subquery = self._get_subquery(subquestion, counter,\
-                                            self.rules, self.keywords)
-            subqueries.append(subquery)
+        subqueries = self._get_subqueries()
 
         query = self._merge_subqueries(subqueries)
 
         return '?output', query, None
 
-    def _get_subquery(self, subquestion, counter, rules, keywords):
+    def _get_subqueries(self):
+        subqueries = []
+        counter = 0
+
+        for subquestion in self.subquestions:
+            subquery = self._get_subqueries(subquestion, counter)
+            subqueries.append(subquery)
 
         return {'db': db,'query': query}
 
