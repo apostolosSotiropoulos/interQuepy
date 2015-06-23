@@ -4,6 +4,7 @@ from quepy import settings
 from quepy import generation
 from quepy.tagger import get_tagger, TaggingError
 from quepy.encodingpolicy import encoding_flexible_conversion
+from quepy.sparql_generation import get_core_sparql_expression
 
 logger = logging.getLogger("quepy.quepyapp")
 
@@ -86,10 +87,24 @@ class Subquestion(Question):
         counter = 0
 
         for subquestion in self.subquestions:
-            subquery = self._get_subqueries(subquestion, counter)
-            subqueries.append(subquery)
+            rule_matched = self.rules[self.keywords[subquestion[0]]]
 
-        return {'db': db,'query': query}
+            question = encoding_flexible_conversion(' '.join(subquestion))
+            tagger = get_tagger()
+            words = list(tagger(question))
+            subquery_expression, meta = rule_matched.get_interpretation(words)
+            core_subquery = get_core_sparql_expression(subquery_expression)
+
+            subquery = fix_variables(core_subquery, counter)
+            db = rule_matched.db
+            subqueries.append({'db': db, 'query': subquery})
+
+            counter += 1
+
+        final_subquery = 'foo'
+        subqueries.append(final_subquery)
+
+        return subqueries
 
     def _merge_subqueries(self, subqueries):
         grouped_subqueries = {}

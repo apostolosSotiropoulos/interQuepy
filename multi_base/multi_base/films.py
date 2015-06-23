@@ -19,6 +19,7 @@ class ActedOnQuestion(QuestionTemplate):
     """
 
     keyword = 'starring'
+    db = 'http://dbpedia.org/sparql'
 
     regex = Lemma("star") + Actor()
 
@@ -41,6 +42,7 @@ class SubjectQuestion(QuestionTemplate):
     """
 
     keyword = 'about'
+    db = 'http://dbpedia.org/sparql'
 
     regex = Lemma("about") + Subject()
 
@@ -55,6 +57,7 @@ class SequelQuestion(QuestionTemplate):
     """
 
     keyword = 'sequel of a'
+    db = 'http://data.linkedmdb.org/sparql'
 
     movie = (Lemma("film") | Lemma("movie"))
     regex = Lemma("sequel") + Lemma("of") + Lemma("a") + movie
