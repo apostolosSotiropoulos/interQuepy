@@ -18,8 +18,12 @@ class ActedOnQuestion(QuestionTemplate):
     Ex: "Movies starring Winona Ryder"
     """
 
-    keyword = 'starring'
-    db = 'http://dbpedia.org/sparql'
+    metadata = dict(
+        keyword='starring',
+        db='http://dbpedia.org/sparql',
+        input_form='string',
+        input_type='foaf:Person',
+        output_type='dbpedia-owl:Film')
 
     regex = Lemma("star") + Actor()
 
@@ -41,8 +45,12 @@ class SubjectQuestion(QuestionTemplate):
     Ex: "Movies about Giant Monsters"
     """
 
-    keyword = 'about'
-    db = 'http://dbpedia.org/sparql'
+    metadata = dict(
+        keyword='about',
+        db='http://dbpedia.org/sparql',
+        input_form='string',
+        input_type='skos:Concept',
+        output_type='dbpedia-owl:Film')
 
     regex = Lemma("about") + Subject()
 
@@ -56,8 +64,12 @@ class SequelQuestion(QuestionTemplate):
     Ex: "sequel of Godgilla and the Sea Monster"
     """
 
-    keyword = 'sequel of a'
-    db = 'http://data.linkedmdb.org/sparql'
+    metadata = dict(
+        keyword='sequel of a',
+        db='http://data.linkedmdb.org/sparql',
+        input_form='variable',
+        input_type='dbpedia-owl:Film',
+        output_type='movie:film')
 
     movie = (Lemma("film") | Lemma("movie"))
     regex = Lemma("sequel") + Lemma("of") + Lemma("a") + movie

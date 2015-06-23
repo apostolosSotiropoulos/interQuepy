@@ -112,8 +112,9 @@ class QuepyApp(object):
                         element is not QuestionTemplate:
 
                     self.rules.append(element())
-                    if hasattr(element(), 'keyword'):
-                        self.keywords[element().keyword] = len(self.rules) - 1
+                    if hasattr(element(), 'metadata'):
+                        keyword = element().metadata['keyword']
+                        self.keywords[keyword] = len(self.rules) - 1
 
             except TypeError:
                 continue
