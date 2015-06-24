@@ -90,42 +90,21 @@ class Subquestion(Question):
         for subquestion in self.subquestions:
             rule_matched = self.rules[self.keywords[subquestion[0]]]
 
-            # find default subquery with wrong var names
-            question = encoding_flexible_conversion(' '.join(subquestion))
-            tagger = get_tagger()
-            words = list(tagger(question))
-            subquery_expression, meta = rule_matched.get_interpretation(words)
-            core_subquery = get_core_sparql_expression(subquery_expression)
+            subquery = self._get_subquery_by_subquestion_and_rule(\
+                                                    subquestion, rule_matched)
+            subquery = self._add_offset_to_query_vars(subquery, counter * 10)
+            subquery = self._rename_output_var(subquery)
+            subquery = self._rename_input_var(subquery, var_and_type, \
+                                              rule_matched.input_type)
 
-            # change variables numbers
-            # variables = [w for w in core_subquery.split() if w.startswith('?')]
-            # variables = list(set(variables))
-            # old_new_vars = [
-
-            # fix input var names
-            var_name = self.find_var_name(core_subquery,
-                                          rule_matched.metadata['input_type'],
-                                          '"input_var"@en')
-            if rule_matched.metadata['input_form'] is 'string':
-                new_var_name = '?x' + \
-                               str(int(var_name.split('x')[1]) + counter * 100)
+            out_var = self._find_out_var(subquery, rule_matched.output_type)
+            if rule_matched.output_type in var_and_type:
+                new_var = var_and_type[rule_matched.output_type]
+                subquery = subquery.replace(out_var, new_var)
             else:
-                new_var_name = var_and_type[rule_matched.metadata['input_type']]
-            core_subquery = core_subquery.replace(var_name, new_var_name)
+                var_and_type[rule_matched.output_type] = out_var
 
-            # fix output var names
-            var_name = self.find_var_name(core_subquery,
-                                          rule_matched.metadata['output_type'],
-                                          '"ouput_var"@en')
-            if rule_matched.metadata['output_type'] in var_and_type:
-                new_var_name = var_and_type[rule_matched.metadata['output_type']]
-            else:
-                new_var_name = var_name
-                var_and_type[rule_matched.metadata['output_type']] = var_name
-            subquery = core_subquery.replace(var_name, new_var_name)
-
-            db = rule_matched.metadata['db']
-            subqueries.append({'db': db, 'query': subquery})
+            subqueries.append({'db': rule_matched.db, 'query': subquery})
 
             counter += 1
 
@@ -133,6 +112,32 @@ class Subquestion(Question):
         subqueries.append(final_subquery)
 
         return subqueries
+
+    def _get_subquery_by_subquestion_and_rule(self, subquestion, rule):
+        question = encoding_flexible_conversion(' '.join(subquestion))
+        tagger = get_tagger()
+        words = list(tagger(question))
+        subquery_expression, meta = rule.get_interpretation(words)
+        return get_core_sparql_expression(subquery_expression)
+
+    def _add_offset_to_query_vars(self, query, offset):
+        return query.replace(u'?x', u'?x' + str(offset))
+
+    def _rename_output_var(self, query):
+        return query.replace('"output_var"@en', '?result')
+
+    def _rename_input_var(self, query, var_and_type, input_type):
+        if '"input_var"@en' in query:
+            old_var = '"input_var"@en'
+            new_var = var_and_type[input_type]
+            return query.replace(old_var, new_var)
+        return query
+
+    def _find_out_var(self, query, type):
+        for sentence in query.split('.'):
+            if type in sentence:
+                var_name = [w for w in sentence.split() if w.startswith('?')]
+                return var_name[0]
 
     def _merge_subqueries(self, subqueries):
         grouped_subqueries = {}
@@ -154,11 +159,3 @@ class Subquestion(Question):
 
         return template
 
-    def find_var_name(self, query, property, var_name_type):
-        for sentence in query.split('.'):
-            if var_name_type in sentence:
-                return var_name_type
-            if property in sentence:
-                var_name = [w for w in sentence.split() if w.startswith('?')]
-                return var_name[0]
-        return 'x0'

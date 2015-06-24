@@ -6,7 +6,7 @@ Main script for multi_base quepy.
 
 import quepy
 multi_dbs = quepy.install("multi_base")
-question = 'sequel of a film about Giant Monster starring' \
+question = 'which movie is sequel of a movie about Giant Monster starring' \
            ' Akira Takarada'
 # question = 'what is a blowtorch?'
 # question = 'about Giant Monster starring Akira Takarada'
