@@ -85,6 +85,7 @@ class Subquestion(Question):
     def _get_subqueries(self):
         subqueries = []
         counter = 0
+        var_and_type = {}
 
         for subquestion in self.subquestions:
             rule_matched = self.rules[self.keywords[subquestion[0]]]
@@ -96,8 +97,32 @@ class Subquestion(Question):
             subquery_expression, meta = rule_matched.get_interpretation(words)
             core_subquery = get_core_sparql_expression(subquery_expression)
 
-            # fix var names
-            subquery = fix_variables(core_subquery, counter)
+            # change variables numbers
+            # variables = [w for w in core_subquery.split() if w.startswith('?')]
+            # variables = list(set(variables))
+            # old_new_vars = [
+
+            # fix input var names
+            var_name = self.find_var_name(core_subquery,
+                                          rule_matched.metadata['input_type'],
+                                          '"input_var"@en')
+            if rule_matched.metadata['input_form'] is 'string':
+                new_var_name = '?x' + \
+                               str(int(var_name.split('x')[1]) + counter * 100)
+            else:
+                new_var_name = var_and_type[rule_matched.metadata['input_type']]
+            core_subquery = core_subquery.replace(var_name, new_var_name)
+
+            # fix output var names
+            var_name = self.find_var_name(core_subquery,
+                                          rule_matched.metadata['output_type'],
+                                          '"ouput_var"@en')
+            if rule_matched.metadata['output_type'] in var_and_type:
+                new_var_name = var_and_type[rule_matched.metadata['output_type']]
+            else:
+                new_var_name = var_name
+                var_and_type[rule_matched.metadata['output_type']] = var_name
+            subquery = core_subquery.replace(var_name, new_var_name)
 
             db = rule_matched.metadata['db']
             subqueries.append({'db': db, 'query': subquery})
@@ -128,3 +153,12 @@ class Subquestion(Question):
         template += u"}"
 
         return template
+
+    def find_var_name(self, query, property, var_name_type):
+        for sentence in query.split('.'):
+            if var_name_type in sentence:
+                return var_name_type
+            if property in sentence:
+                var_name = [w for w in sentence.split() if w.startswith('?')]
+                return var_name[0]
+        return 'x0'

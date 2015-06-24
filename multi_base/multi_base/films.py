@@ -65,7 +65,7 @@ class SequelQuestion(QuestionTemplate):
     """
 
     metadata = dict(
-        keyword='sequel of a',
+        keyword='sequel',
         db='http://data.linkedmdb.org/sparql',
         input_form='variable',
         input_type='dbpedia-owl:Film',
