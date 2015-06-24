@@ -64,6 +64,10 @@ class IsMovie(FixedType):
     fixedtype = "dbpedia-owl:Film"
 
 
+class IsLinkedMdbMovie(FixedType):
+    fixedtype = "movie:film"
+
+
 class HasActor(FixedRelation):
     relation = "dbpprop:starring"
 

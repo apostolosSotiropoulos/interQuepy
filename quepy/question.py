@@ -102,14 +102,17 @@ class Subquestion(Question):
                 new_var = var_and_type[rule_matched.output_type]
                 subquery = subquery.replace(out_var, new_var)
             else:
-                var_and_type[rule_matched.output_type] = out_var
+                last_output_type = rule_matched.output_type
+                last_output_db = rule_matched.db
+                var_and_type[last_output_type] = out_var
 
             subqueries.append({'db': rule_matched.db, 'query': subquery})
 
             counter += 1
 
-        final_subquery = 'foo'
-        subqueries.append(final_subquery)
+        final_subquery = self._get_final_subquery(last_output_type, \
+                                                  var_and_type)
+        subqueries.append({'db': last_output_db, 'query': final_subquery})
 
         return subqueries
 
@@ -137,7 +140,12 @@ class Subquestion(Question):
         for sentence in query.split('.'):
             if type in sentence:
                 var_name = [w for w in sentence.split() if w.startswith('?')]
-                return var_name[0]
+                var_name = '?result' if '?result' in query else var_name[0]
+                return var_name
+
+    def _get_final_subquery(self, last_output_type, var_and_type):
+        input_var = var_and_type[last_output_type]
+        return u'\n' + input_var + u' rdfs:label ?output .'
 
     def _merge_subqueries(self, subqueries):
         grouped_subqueries = {}

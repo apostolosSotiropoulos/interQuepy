@@ -69,4 +69,4 @@ class SequelQuestion(QuestionTemplate):
     regex = Lemma("sequel") + Lemma("of") + Lemma("a") + movie
 
     def interpret(self, match):
-        return SameAs('input_var') + IsSequel('output_var')
+        return SameAs('input_var') + IsLinkedMdbMovie() + IsSequel('output_var')
